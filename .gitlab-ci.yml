@@ -1,0 +1,48 @@
+stages: 
+  #- test
+  - deploy
+  #- build
+
+#build-dev: 
+#  image: "node:16"
+#  only:
+#   - test
+#  script: 
+#    - "npm install"
+#    - "npm run"
+#  stage: build
+
+# test-dev: 
+#   script: 
+#     - "echo \"Code is tested\""
+#   stage: test
+variables:
+     SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
+    # DEPLOYMENT_TOKEN: gitlab+deploy-token-1477144:kzcEbK5WKJ8svhGoVs5f 
+deploy-dev: 
+  before_script:
+    - "apk add --no-cache openssh"
+    - "mkdir -p ~/.ssh"
+    - "eval \"$(ssh-agent -s)\""
+    - "echo \"$SSH_PRIVATE_KEY\" | tr -d '\\r' | ssh-add -"
+    - "chmod 700 ~/.ssh"
+    - ssh-keyscan -H "$client" >> ~/.ssh/known_hosts
+  image: alpine
+  only: 
+    - staging
+  
+  script: 
+    - pwd
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client"
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" set -f
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" sudo rm -rf /var/www/html/bodySlides/admin-frontend
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" "cd /var/www/html/bodySlides && sudo git clone https://gitlab+deploy-token-1477309:WSi8PLfnBNnTrtf5Cp3d@gitlab.com/Codistan/bodyslides/admin-frontend.git"
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" "cd /var/www/html/bodySlides/admin-frontend && sudo git checkout staging"
+   # - ssh -o StrictHostKeyChecking=no ubuntu@"$client" sudo cp /home/ubuntu/enviorment/frontend/.env  /var/www/html/bodySlides/admin-frontend/
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" echo "Running npm install"
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" "cd /var/www/html/bodySlides/admin-frontend && sudo yarn install"
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" echo "Starting project build"
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" "cd /var/www/html/bodySlides/admin-frontend && sudo PUBLIC_URL="$ROOT" sudo yarn run build "
+    - ssh -o StrictHostKeyChecking=no ubuntu@"$client" "sudo mv /var/www/html/bodySlides/admin-frontend/build /var/www/html/bodySlides/admin-frontend/admin-panel "
+    
+  stage: deploy

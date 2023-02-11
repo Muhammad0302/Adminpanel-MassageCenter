@@ -1,0 +1,23 @@
+svg{
+    margin-right: 7px;
+}
+/* svg:hover path {
+    fill: red;
+ } */
+
+ .svg-icon path {
+    fill: rgb(200, 23, 93);
+ }
+
+ .css-1uc7dxe-MuiButtonBase-root-MuiListItemButton-root:hover {
+    background-color: #ffff !important;    
+    color: black !important;
+ }
+ .css-uix0ve:hover{
+    background-color: #ffff !important;    
+    color: black !important;
+ }
+ css-1obw2ox-MuiButtonBase-root-MuiListItemButton-root:active {
+    background-color: #ffff !important;    
+    color: black !important;
+ }
